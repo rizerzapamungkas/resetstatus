@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permintaan Reset Status KJMU</title>
+    <style>
+        :root {
+            --primary-color: #0047AB; /* Biru profesional */
+            --secondary-color: #f4f7f6;
+            --accent-color: #ffcc00; /* Kuning aksen */
+            --text-color: #333;
+            --border-radius: 8px;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h3 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: var(--transition);
+            box-sizing: border-box; /* Pastikan padding tidak nambah lebar */
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 71, 171, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            height: 100px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+
+        .btn-submit:hover {
+            background-color: #003a8c;
+        }
+
+        .btn-search {
+            background-color: #fff;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            margin-top: 10px;
+        }
+
+        .btn-search:hover {
+            background-color: rgba(0, 71, 171, 0.05);
+        }
+
+        .divider {
+            height: 1px;
+            background-color: #eee;
+            margin: 40px 0;
+        }
+
+        #hasil {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            background-color: #fafafa;
+            border: 1px solid #eee;
+            transition: var(--transition);
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        #hasil.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #hasil p {
+            margin: 0 0 10px 0;
+        }
+
+        #hasil p strong {
+            color: #555;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        /* Contoh warna status */
+        .status-badge.pending { background-color: #ffeeba; color: #856404; }
+        .status-badge.diproses { background-color: #b8daff; color: #004085; }
+        .status-badge.selesai { background-color: #c3e6cb; color: #155724; }
+        .status-badge.ditolak { background-color: #f5c6cb; color: #721c24; }
+        .status-badge.not-found { background-color: #e2e3e5; color: #383d41; }
+
+        /* --- Animasi Popout Sukses --- */
+        #success-popout {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background-color: #fff;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #success-popout.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        #success-popout .icon {
+            font-size: 50px;
+            color: #28a745;
+            margin-bottom: 15px;
+        }
+
+        #success-popout h4 {
+            margin: 0 0 10px 0;
+            color: var(--primary-color);
+        }
+
+        #success-popout p {
+            margin: 0;
+            color: #666;
+        }
+
+        #popout-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        #popout-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* --- Animasi Loading Popout --- */
+        #loading-popout {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255,255,255,0.9);
+            padding: 20px 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        #loading-popout.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsif untuk layar kecil */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h3 {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <section>
+            <h3>Permintaan Reset Status KJMU</h3>
+            <div class="input-group">
+                <label for="nama">Nama Lengkap</label>
+                <input type="text" id="nama" placeholder="Masukkan nama lengkap sesuai KTP/KTM">
+            </div>
+            <div class="input-group">
+                <label for="nim">NIM</label>
+                <input type="text" id="nim" placeholder="Masukkan Nomor Induk Mahasiswa">
+            </div>
+            <div class="input-group">
+                <label for="alasan">Alasan Reset Status</label>
+                <textarea id="alasan" placeholder="Jelaskan alasan Anda memerlukan reset status pendataan..."></textarea>
+            </div>
+            <button class="btn-submit" onclick="kirim()">Kirim Permintaan</button>
+        </section>
+
+        <div class="divider"></div>
+
+        <section>
+            <h3>Cek Status Laporan</h3>
+            <div class="input-group">
+                <label for="cariNim">Masukkan NIM</label>
+                <input type="text" id="cariNim" placeholder="NIM yang diajukan">
+            </div>
+            <button class="btn-search" onclick="cari()">Cari Status</button>
+            <div id="hasil"></div>
+        </section>
+    </div>
+
+    <div id="popout-overlay"></div>
+    <div id="success-popout">
+        <div class="icon">&#10004;</div>
+        <h4>Berhasil!</h4>
+        <p>Permintaan reset status Anda telah terkirim.</p>
+    </div>
+
+    <div id="loading-popout">
+        <div class="spinner"></div>
+        <span>Memuat data...</span>
+    </div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbzhaaEjfbF3Eb2DfWrvqtOMSlE3PsF5rNzlDGDyQolJqvFMtZf0GIhBh_iwrfj7R6gQHQ/exec"; 
+
+        const successPopout = document.getElementById('success-popout');
+        const loadingPopout = document.getElementById('loading-popout');
+        const overlay = document.getElementById('popout-overlay');
+        const hasilDiv = document.getElementById('hasil');
+
+        function showSuccess() {
+            overlay.classList.add('show');
+            successPopout.classList.add('show');
+            setTimeout(() => {
+                successPopout.classList.remove('show');
+                overlay.classList.remove('show');
+            }, 3000); // Sembunyikan setelah 3 detik
+        }
+
+        function showLoading(show) {
+            if (show) {
+                loadingPopout.classList.add('show');
+            } else {
+                loadingPopout.classList.remove('show');
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('nama').value = '';
+            document.getElementById('nim').value = '';
+            document.getElementById('alasan').value = '';
+        }
+
+        async function kirim() {
+            const nama = document.getElementById('nama').value.trim();
+            const nim = document.getElementById('nim').value.trim();
+            const alasan = document.getElementById('alasan').value.trim();
+
+            if (!nama || !nim || !alasan) {
+                alert("Mohon lengkapi semua isian formulir.");
+                return;
+            }
+
+            let data = {action: 'tambah', nama: nama, nim: nim, alasan: alasan};
+            
+            try {
+                // Tampilkan loading saat mengirim
+                showLoading(true);
+                await fetch(API_URL, {method: 'POST', body: JSON.stringify(data)});
+                // Sembunyikan loading, tampilkan sukses
+                showLoading(false);
+                showSuccess();
+                clearForm(); // Bersihkan form setelah sukses
+            } catch (error) {
+                showLoading(false);
+                console.error('Error:', error);
+                alert("Terjadi kesalahan saat mengirim data. Silakan coba lagi.");
+            }
+        }
+
+        async function cari() {
+            const nim = document.getElementById('cariNim').value.trim();
+            hasilDiv.classList.remove('show'); // Sembunyikan hasil sebelumnya
+            hasilDiv.innerHTML = ''; // Bersihkan konten sebelumnya
+
+            if (!nim) {
+                alert("Mohon masukkan NIM untuk mencari.");
+                return;
+            }
+
+            try {
+                showLoading(true);
+                let res = await fetch(API_URL + "?nim=" + nim);
+                let data = await res.json();
+                showLoading(false);
+
+                if (data.status === "Not Found") {
+                    hasilDiv.innerHTML = `<p class="status-badge not-found">Data tidak ditemukan untuk NIM tersebut.</p>`;
+                } else {
+                    // Buat kelas CSS berdasarkan status (bersihkan spasi dan ubah kecil)
+                    const statusClass = data.status.toLowerCase().replace(/\s+/g, '');
+                    hasilDiv.innerHTML = `
+                        <p><strong>Nama:</strong> ${data.nama}</p>
+                        <p><strong>NIM:</strong> ${data.nim}</p>
+                        <p><strong>Status:</strong> <span class="status-badge ${statusClass}">${data.status}</span></p>
+                    `;
+                }
+                hasilDiv.classList.add('show'); // Tampilkan hasil dengan animasi
+            } catch (error) {
+                showLoading(false);
+                console.error('Error:', error);
+                alert("Terjadi kesalahan saat mengambil data. Silakan coba lagi.");
+            }
+        }
+    </script>
+</body>
+</html>
