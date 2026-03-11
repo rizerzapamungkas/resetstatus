@@ -376,7 +376,7 @@
 
             try {
                 showLoading(true);
-                let res = await fetch(API_URL + "?nim=" + nim);
+                let res = await fetch(`${API_URL}?nim=${nim}&_=${new Date().getTime()}`);
                 let data = await res.json();
                 showLoading(false);
 
@@ -384,11 +384,17 @@
                     hasilDiv.innerHTML = `<p class="status-badge not-found">Data tidak ditemukan untuk NIM tersebut.</p>`;
                 } else {
                     // Buat kelas CSS berdasarkan status (bersihkan spasi dan ubah kecil)
-                    const statusClass = data.status.toLowerCase().replace(/\s+/g, '');
+                    // Di dalam function cari() bagian loop hasil:
+                    const rawStatus = data.status || "pending";
+                    const statusClass = rawStatus.toLowerCase().trim(); 
+                    
                     hasilDiv.innerHTML = `
-                        <p><strong>Nama:</strong> ${data.nama}</p>
-                        <p><strong>NIM:</strong> ${data.nim}</p>
-                        <p><strong>Status:</strong> <span class="status-badge ${statusClass}">${data.status}</span></p>
+                        <div style="border-left: 4px solid var(--primary-color); padding-left: 15px;">
+                            <p><strong>Hasil Terbaru:</strong></p>
+                            <p><strong>Nama:</strong> ${data.nama}</p>
+                            <p><strong>NIM:</strong> ${data.nim}</p>
+                            <p><strong>Status:</strong> <span class="status-badge ${statusClass}">${data.status}</span></p>
+                        </div>
                     `;
                 }
                 hasilDiv.classList.add('show'); // Tampilkan hasil dengan animasi
@@ -402,5 +408,6 @@
 </body>
 
 </html>
+
 
 
